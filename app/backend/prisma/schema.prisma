@@ -1,15 +1,240 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// =======================================
+// 🔹 CONFIGURAÇÕES GERAIS DO PROJETO
+// =======================================
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+// =======================================
+// 🔸 EMPRESAS E USUÁRIOS
+// =======================================
+model Empresa {
+  id              Int                  @id @default(autoincrement())
+  nome            String
+  email           String               @unique
+  telefone        String?
+  cnpj            String?
+  planoId         Int?
+  plano           Plano?               @relation(fields: [planoId], references: [id])
+  ativo           Boolean              @default(true)
+  criadoEm        DateTime             @default(now())
+  atualizadoEm    DateTime             @default(now()) @updatedAt
+
+  usuarios        Usuario[]
+  clientes        Cliente[]
+  servicos        Servico[]
+  agendas         Agenda[]
+  agendamentos    Agendamento[]
+  configuracao    ConfiguracaoEmpresa? // 1:1
+  notificacoes    Notificacao[]
+  auditorias      Auditoria[]
+  pagamentos      Pagamento[]
+  faturas         Fatura[]
+}
+
+model Usuario {
+  id              Int             @id @default(autoincrement())
+  nome            String
+  email           String          @unique
+  senha           String
+  role            String          @default("funcionario") // admin | funcionario
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  ativo           Boolean         @default(true)
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @default(now()) @updatedAt
+
+  sessoes         SessaoUsuario[]
+  logs            Log[]
+  auditorias      Auditoria[]
+}
+
+// =======================================
+// 🔸 CLIENTES
+// =======================================
+model Cliente {
+  id              Int             @id @default(autoincrement())
+  nome            String
+  telefone        String?
+  email           String?
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @default(now()) @updatedAt
+
+  agendamentos    Agendamento[]
+  notificacoes    Notificacao[]
+}
+
+// =======================================
+// 🔸 SERVIÇOS / AGENDAS / AGENDAMENTOS
+// =======================================
+model Servico {
+  id              Int             @id @default(autoincrement())
+  nome            String
+  descricao       String?
+  duracaoMinutos  Int
+  preco           Decimal         @db.Decimal(10,2)
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  ativo           Boolean         @default(true)
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @default(now()) @updatedAt
+
+  itens           ItemAgendamento[]
+}
+
+model Agenda {
+  id              Int             @id @default(autoincrement())
+  nome            String
+  descricao       String?
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  ativo           Boolean         @default(true)
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @default(now()) @updatedAt
+
+  agendamentos    Agendamento[]
+}
+
+model Agendamento {
+  id              Int             @id @default(autoincrement())
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  clienteId       Int
+  cliente         Cliente         @relation(fields: [clienteId], references: [id])
+  agendaId        Int
+  agenda          Agenda          @relation(fields: [agendaId], references: [id])
+  dataHora        DateTime
+  status          String          @default("pendente") // pendente | confirmado | cancelado
+  observacao      String?
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @default(now()) @updatedAt
+
+  itens           ItemAgendamento[]
+}
+
+model ItemAgendamento {
+  id              Int             @id @default(autoincrement())
+  agendamentoId   Int
+  agendamento     Agendamento     @relation(fields: [agendamentoId], references: [id])
+  servicoId       Int
+  servico         Servico         @relation(fields: [servicoId], references: [id])
+  quantidade      Int             @default(1)
+  precoUnitario   Decimal         @db.Decimal(10,2)
+}
+
+// =======================================
+// 🔸 PLANOS E PAGAMENTOS
+// =======================================
+model Plano {
+  id              Int             @id @default(autoincrement())
+  nome            String
+  descricao       String?
+  precoMensal     Decimal         @db.Decimal(10,2)
+  limiteUsuarios  Int?
+  limiteClientes  Int?
+  criadoEm        DateTime        @default(now())
+  atualizadoEm    DateTime        @default(now()) @updatedAt
+
+  empresas        Empresa[]
+  pagamentos      Pagamento[]
+  faturas         Fatura[]
+}
+
+model Pagamento {
+  id              Int             @id @default(autoincrement())
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  planoId         Int
+  plano           Plano           @relation(fields: [planoId], references: [id])
+  valor           Decimal         @db.Decimal(10,2)
+  metodo          String          // cartao | pix | boleto
+  status          String          @default("pendente") // pendente | pago | falhou
+  referencia      String?
+  criadoEm        DateTime        @default(now())
+  pagoEm          DateTime?
+}
+
+model Fatura {
+  id              Int             @id @default(autoincrement())
+  empresaId       Int
+  empresa         Empresa         @relation(fields: [empresaId], references: [id])
+  planoId         Int
+  plano           Plano           @relation(fields: [planoId], references: [id])
+  valor           Decimal         @db.Decimal(10,2)
+  periodoInicio   DateTime
+  periodoFim      DateTime
+  status          String          @default("pendente")
+  geradoEm        DateTime        @default(now())
+  pagoEm          DateTime?
+}
+
+// =======================================
+// 🔸 CONFIGURAÇÕES, NOTIFICAÇÕES E AUDITORIA
+// =======================================
+model ConfiguracaoEmpresa {
+  id                     Int        @id @default(autoincrement())
+  empresaId              Int        @unique
+  empresa                Empresa    @relation(fields: [empresaId], references: [id])
+  horarioAbertura        String?
+  horarioFechamento      String?
+  diasFuncionamento      String?    // "1,2,3,4,5,6"
+  politicaCancelamentoHoras Int?    // horas antes do cancelamento
+  enviarLembrete         Boolean    @default(true)
+  criadoEm               DateTime   @default(now())
+  atualizadoEm           DateTime   @default(now()) @updatedAt
+}
+
+model Notificacao {
+  id              Int       @id @default(autoincrement())
+  empresaId       Int
+  empresa         Empresa   @relation(fields: [empresaId], references: [id])
+  clienteId       Int?
+  cliente         Cliente?  @relation(fields: [clienteId], references: [id])
+  tipo            String    // whatsapp | email | sms
+  mensagem        String
+  status          String    @default("pendente")
+  enviadoEm       DateTime?
+  criadoEm        DateTime  @default(now())
+}
+
+model Auditoria {
+  id              Int       @id @default(autoincrement())
+  empresaId       Int
+  empresa         Empresa   @relation(fields: [empresaId], references: [id])
+  entidade        String
+  registroId      Int
+  acao            String    // create | update | delete
+  antes           Json?
+  depois          Json?
+  usuarioId       Int?
+  usuario         Usuario?  @relation(fields: [usuarioId], references: [id])
+  criadoEm        DateTime  @default(now())
+}
+
+// =======================================
+// 🔸 SESSÕES E LOGS
+// =======================================
+model SessaoUsuario {
+  id              Int       @id @default(autoincrement())
+  usuarioId       Int
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id])
+  token           String
+  expiracao       DateTime
+  criadoEm        DateTime  @default(now())
+}
+
+model Log {
+  id              Int       @id @default(autoincrement())
+  usuarioId       Int?
+  usuario         Usuario?  @relation(fields: [usuarioId], references: [id])
+  acao            String
+  detalhes        String?
+  criadoEm        DateTime  @default(now())
 }

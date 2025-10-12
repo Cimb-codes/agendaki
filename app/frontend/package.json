@@ -10,11 +10,18 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "aos": "^2.3.4",
+    "axios": "^1.12.2",
     "nuxt": "^4.1.2",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primevue": "^3.30.0",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/node": "^24.6.2",
+    "sass-embedded": "^1.93.2"
   }
 }

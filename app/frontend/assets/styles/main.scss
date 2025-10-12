@@ -1,0 +1,19 @@
+/* assets/styles/main.scss */
+
+@use 'variables' as *;
+@use 'primevue' as *;
+
+/* CSS global do PrimeVue e dependências (continuam sendo CSS puro, então permanecem com @import) */
+@import 'primevue/resources/themes/saga-blue/theme.css';
+@import 'primevue/resources/primevue.min.css';
+@import 'primeicons/primeicons.css';
+@import 'primeflex/primeflex.css';
+
+/* Estilos globais adicionais */
+body {
+    font-family: $font-family-base;
+    color: $text-color;
+    background-color: $background-color;
+    margin: 0;
+    padding: 0;
+}

@@ -1,0 +1,41 @@
+@use 'variables' as *;
+
+:root {
+    --primary-color: #{$primary-color};
+    --primary-color-hover: #{$primary-color-hover};
+    --secondary-color: #{$secondary-color};
+    --background-color: #{$background-color};
+    --text-color: #{$text-color};
+    --title-color: #{$title-color};
+    --border-radius: #{$border-radius};
+    --box-shadow: #{$box-shadow};
+}
+
+/* Botões PrimeVue */
+.p-button {
+    background-color: #7AAE25 !important;
+    border: none;
+    border: 1px solid #7AAE25 !important;
+    color: white !important;
+}
+
+.p-button:hover {
+    background-color: var(--primary-color-hover) !important;
+}
+
+/* Inputs PrimeVue */
+.p-inputtext,
+.p-password input {
+    border-radius: var(--border-radius);
+    border: 1px solid #dcdcdc;
+}
+
+.p-inputtext:focus,
+.p-password input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.p-password .p-password-toggle-icon {
+    color: var(--primary-color);
+}

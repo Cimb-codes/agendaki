@@ -1,0 +1,28 @@
+/* assets/styles/primevue.scss */
+
+@forward 'variables';
+
+:root {
+    /* 🎨 Personalização do tema PrimeVue */
+    --primary-color: #412A74;
+    --primary-color-text: #ffffff;
+    --surface-ground: #f8f9fa;
+    --surface-card: #ffffff;
+    --surface-border: #dee2e6;
+    --text-color: #333333;
+    --text-color-secondary: #6c757d;
+    --border-radius: 12px;
+    --focus-ring: 0 0 0 0.2rem rgba(65, 42, 116, 0.3);
+}
+
+/* 🔘 Ajustes de componentes */
+.p-button {
+    font-family: 'Inter', sans-serif;
+    border-radius: var(--border-radius);
+    box-shadow: none;
+}
+
+.p-card {
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
